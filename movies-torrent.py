@@ -15,21 +15,22 @@ headers = {
 pages = 1
 link = f'https://1337x.to/search/dragon+ball+z/{pages}/'
 
-response = requests.get(link,headers=headers)
+response = requests.get(link, headers=headers)
 
 if response.status_code == 200:
-    print('STATUS: ',response.status_code,'- Request successful!')
-    print('URL: ', response.url)
-    
     soup = BeautifulSoup(response.text, 'html.parser')
-    cards = soup.find_all('tr', class_='odd')
-    print(f'Found {len(cards)} torrents:')
-    print('-----------------------------------')
-    
-    # for card in cards:
-    #     print('-----------------------------------')
-    #     name = job.find('h2', class_='h3 font-weight-bold text-body mb-8')
-    #     name = str(name)
-    #     print('Job Title:', name.replace('<h2 class="h3 font-weight-bold text-body mb-8">', '').strip().replace('</h2>',''))
+    table = soup.find('table', class_='table-list')
+    if table:
+        rows = table.find_all('tr')[1:]  # Ignora o cabeçalho
+        for row in rows:
+            title_col = row.find('td', class_='coll-1 name')
+            if title_col:
+                a_tag = title_col.find('a', href=True)
+                if a_tag:
+                    title = a_tag.text.strip()
+                    torrent_link = 'https://1337x.to' + a_tag['href']
+                    print(f'Title: {title}')
+                    print(f'Link: {torrent_link}')
+                    print('---')
 else:
-    print('Request failed with status code:', response.status_code)
+    print('Falha na requisição. Código:', response.status_code)
